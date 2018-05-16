@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
@@ -6,12 +7,11 @@ from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from server.pdf_converter import PdfConverter
 
-UPLOAD_FOLDER = "../uploads"
+UPLOAD_FOLDER = os.path.join(os.path.dirname(sys.argv[0]), "uploads")
 ALLOWED_FILETYPES = ['pdf']
-HTML_INPUT_NAME = 'pdfToConvert'
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = "../uploads"
 
 api = Api(app, prefix="/api/v1")
 
@@ -20,6 +20,8 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 class UploadController(Resource):
+
+    HTML_INPUT_NAME = 'pdfToConvert'
 
     def __init__(self):
         self.converter = PdfConverter()
@@ -32,7 +34,7 @@ class UploadController(Resource):
 
     def post(self) -> tuple:
         # get() rather than ['key'] returns a default of None rather than raising KeyError
-        uploaded_file = request.files.get(HTML_INPUT_NAME)
+        uploaded_file = request.files.get(self.HTML_INPUT_NAME)
         if not uploaded_file:
             return {'Error': 'No file provided'}, 400
         
@@ -49,6 +51,7 @@ class UploadController(Resource):
             print(f'Saving file to {absolute_save_path}')
             uploaded_file.save(absolute_save_path)
             self.converter.add_pdf(absolute_save_path)
+
         except OSError:
             if os.path.exists(absolute_save_path):
                 os.remove(absolute_save_path)

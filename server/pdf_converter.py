@@ -39,20 +39,23 @@ class ConverterThread(threading.Thread):
     def run(self):
         # Keep running until the main() method has finished
         while True:
-            # Get the next file path from the queue
+
             pdf_to_convert_path = self.work_queue.get()
 
-            # Start the new file conversion (this bit should perhaps be async)
             parent_directory = os.path.dirname(pdf_to_convert_path)
-            file_name = os.path.basename(pdf_to_convert_path)
-            pdf_conversion_command = ['pdftoppm', pdf_to_convert_path, file_name, '-png', '-r', '300']
+            pdf_file = os.path.basename(pdf_to_convert_path)
+            output_file_prefix = os.path.splitext(pdf_file)[0]
+
+            pdf_conversion_command = ['pdftoppm', pdf_file, output_file_prefix, '-png', '-r', '300']
 
             print(f'{threading.currentThread().getName()} processing {pdf_to_convert_path}')
             self.pdf_convert_result: CompletedProcess = run(pdf_conversion_command, cwd=parent_directory)
-            print(f'{threading.currentThread().getName()} finished converting {pdf_to_convert_path}')
 
             if self.pdf_convert_result.returncode == 0:
-                self.scan_queue.put(ScannerWorkItem(parent_directory, file_name))
+                print(f'{threading.currentThread().getName()} finished converting {pdf_to_convert_path}')
+                self.scan_queue.put(ScannerWorkItem(parent_directory, output_file_prefix))
+            else:
+                print(f'{threading.currentThread().getName()} error converting {pdf_to_convert_path}')
 
             self.work_queue.task_done()
 
