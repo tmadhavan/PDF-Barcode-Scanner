@@ -1,5 +1,5 @@
 function uploadFile() {
-    let uploadStatusDiv: HTMLDivElement = document.getElementById("uploadStatus") as HTMLDivElement;
+    let uploadStatusDiv: HTMLDivElement = document.getElementById("upload_status") as HTMLDivElement;
     let uploadFileInput: HTMLInputElement = document.getElementById("file_input") as HTMLInputElement;
     let uploadRequest = new XMLHttpRequest();
 
@@ -12,6 +12,7 @@ function uploadFile() {
 
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
+    formData.append("emailAddress", "thomas@tmadhavan.com");
 
 
     uploadRequest.onreadystatechange = () => {
@@ -24,6 +25,7 @@ function uploadFile() {
             }
         }
     }
+
     uploadRequest.upload.addEventListener("load", () => {
             uploadStatusDiv.innerText = "File uploaded"
     });

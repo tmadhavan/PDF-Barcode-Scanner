@@ -1,5 +1,5 @@
 function uploadFile() {
-    var uploadStatusDiv = document.getElementById("uploadStatus");
+    var uploadStatusDiv = document.getElementById("upload_status");
     var uploadFileInput = document.getElementById("file_input");
     var uploadRequest = new XMLHttpRequest();
     if (uploadFileInput.files.length == 0) {
@@ -9,6 +9,7 @@ function uploadFile() {
     var formData = new FormData();
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
+    formData.append("emailAddress", "thomas@tmadhavan.com");
     uploadRequest.onreadystatechange = function () {
         if (uploadRequest.readyState == 4) {
             if (uploadRequest.status == 200) {
