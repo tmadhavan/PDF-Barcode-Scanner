@@ -20,7 +20,8 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(sys.argv[0]), "uploads")
 parser = configparser.ConfigParser()
 parser.read('local.properties')
 
-api.add_resource(UploadController, '/upload', resource_class_kwargs={'upload_folder': UPLOAD_FOLDER, 'email_config': parser['EMAIL']})
+api.add_resource(UploadController, '/upload',
+                 resource_class_kwargs={'upload_folder': UPLOAD_FOLDER, 'email_config': parser['EMAIL']})
 
 
 if __name__ == "__main__":

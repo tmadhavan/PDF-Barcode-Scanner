@@ -9,28 +9,29 @@
 <div id="main_div" class="container">
     <div class="row">
         <div class="col-md-6">
-                <div class="form-group">
-                    <label for="file_input">Upload a PDF to scan</label>
-                    <input id="file_input" class="form-control" type=file name=pdfToConvert>
-                </div>
+            <div class="form-group">
+                <label for="file_input">Upload a PDF to scan</label>
+                <input id="file_input" class="form-control" type=file name=pdfToConvert>
+            </div>
 
             <button class="btn btn-default" onclick="uploadFile()">Upload</button>
 
-
-        <div id="upload_status"></div>
-</div>
+            <div id="upload_status"></div>
+        </div>
     </div>
     <div class="row">
-                <div class="col-md-6">
+        <div class="col-md-6">
 
-        <div class="form-group">
-                                <label for="target_url">Choose a URL to scan</label>
+            <div class="form-group">
+                <label for="target_url">Choose a URL to scan</label>
 
-        <input id="target_url" class="form-control" type="text">
+                <input id="target_url" class="form-control" type="text">
             </div>
-        <button class="btn btn-default" onclick="startScraping()">Scan</button>
+            <button class="btn btn-default" onclick="startScraping()">Scan</button>
+            <div id="scraping_status"></div>
 
         </div>
+    </div>
 </div>
 </body>
 

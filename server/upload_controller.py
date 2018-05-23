@@ -5,8 +5,9 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
-from server.pdf_converter import ConversionManager
+from server.conversion_manager import ConversionManager
 from server.emailer import EmailManager
+from server.pdf import PdfConversionDetails
 
 
 
@@ -15,6 +16,7 @@ class UploadController(Resource):
     ALLOWED_FILETYPES = ['pdf']
     HTML_INPUT_NAME = 'pdfToConvert'
     EMAIL_FORM_INPUT_NAME = 'emailAddress'
+    URL_SCAN_INPUT_NAME = "urlToScan"
 
     def __init__(self,  upload_folder, email_config):
         self.upload_folder = upload_folder
@@ -30,6 +32,7 @@ class UploadController(Resource):
         # get() rather than ['key'] returns a default of None rather than raising KeyError
         uploaded_file = request.files.get(self.HTML_INPUT_NAME)
         email_address = request.form[self.EMAIL_FORM_INPUT_NAME]
+        url_to_scan = request.form[self.URL_SCAN_INPUT_NAME]
 
         print(email_address)
 
@@ -48,7 +51,8 @@ class UploadController(Resource):
             os.mkdir(save_folder)
             print(f'Saving file to {absolute_save_path}')
             uploaded_file.save(absolute_save_path)
-            self.converter.add_pdf({'file_path': absolute_save_path, 'email': email_address})
+            pdf_conversion_details = PdfConversionDetails(absolute_save_path, email_address)
+            self.converter.pdf_convert_queue.put(pdf_conversion_details)
 
         except OSError:
             if os.path.exists(absolute_save_path):

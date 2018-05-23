@@ -6,18 +6,15 @@ from pyzbar.pyzbar import decode, PyZbarError
 
 # Iterate a list of images in a folder, and attempt to scan any barcodes that are present in the 
 # image 
-def scan_images(folder: str, output_filename: str, filetype_to_decode: str="png"):
+def scan_images(folder_to_scan: str, output_file_path: str, filetype_to_decode: str= "png"):
 
-    print(f'extractor.py scanning {folder}')
+    print(f'barcode_extractor.py scanning {folder_to_scan}')
 
-    # Put the output text file in the same folder as the one we're scanning
-    absolute_path_to_output_file = os.path.join(folder, output_filename)
-
-    with open(absolute_path_to_output_file, 'w') as output_file:
-        sorted_file_list = os.listdir(folder)
+    with open(output_file_path, 'w') as output_file:
+        sorted_file_list = os.listdir(folder_to_scan)
 
         for file in sorted(sorted_file_list):
-            absolute_path_to_file = os.path.join(folder, file)
+            absolute_path_to_file = os.path.join(folder_to_scan, file)
             if os.path.isfile(absolute_path_to_file) and file.endswith(f'.{filetype_to_decode}'):
                 output_file.write(f'\n\n{file}\n')
                 

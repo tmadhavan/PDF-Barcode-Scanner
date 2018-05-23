@@ -13,7 +13,7 @@ function uploadFile() {
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
     formData.append("emailAddress", "thomas@tmadhavan.com");
-
+    formData.append("urlToScan", "www.tmadhavan.com");
 
     uploadRequest.onreadystatechange = () => {
         if (uploadRequest.readyState == 4) {
@@ -44,8 +44,36 @@ function uploadFile() {
         }
     });
 
-    uploadRequest.open("POST", "http://localhost:5000/api/v1/upload");
-    uploadRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
+    sendRequest(uploadRequest, formData);
 
-    uploadRequest.send(formData)
+}
+
+function startScraping() {
+    let uploadRequest = new XMLHttpRequest();
+    let scrapingStatusDiv = document.getElementById("scraping_status");
+
+    let formData = new FormData();
+
+    formData.append("emailAddress", "thomas@tmadhavan.com");
+    formData.append("urlToScan", "www.tmadhavan.com");
+
+     uploadRequest.onreadystatechange = () => {
+        if (uploadRequest.readyState == 4) {
+            if (uploadRequest.status == 200) {
+                scrapingStatusDiv.innerText = "File uploaded"
+            } else {
+                scrapingStatusDiv.innerText = `Upload failed with status: ${uploadRequest.status}
+                                             and error: ${uploadRequest.responseText}`
+            }
+        }
+    }
+
+    sendRequest(uploadRequest, formData);
+
+}
+
+function sendRequest(req: XMLHttpRequest, data: FormData) {
+    req.open("POST", "http://localhost:5000/api/v1/upload");
+    req.setRequestHeader("Access-Control-Allow-Origin", "*");
+    req.send(data);
 }

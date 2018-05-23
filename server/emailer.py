@@ -6,25 +6,27 @@ import threading
 import os
 from queue import Queue
 
-class EmailWorkItem:
-
-    def __init__(self, file_to_attach_path, email_address):
-        self.barcodes_file = file_to_attach_path
-        self.email = email_address
-
 
 class EmailManager:
 
-    MAX_THREADS = 1
+    MAX_THREADS = 3
 
-    def __init__(self, email_work_queue, email_config, max_threads=MAX_THREADS):
+    def __init__(self, work_queue: Queue, email_config, max_threads=MAX_THREADS):
 
-        self.email_work_queue = email_work_queue
+        self.email_work_queue: Queue = work_queue
 
         for t in range(max_threads):
             email_thread = EmailWorker(self.email_work_queue, email_config)
             email_thread.setDaemon(True)
             email_thread.start()
+
+        self.email_work_queue.join()
+
+
+class EmailDetails:
+    def __init__(self, barcode_file, email_address):
+        self.barcode_file = barcode_file
+        self.email_address = email_address
 
 
 class EmailWorker(threading.Thread):
@@ -35,14 +37,16 @@ class EmailWorker(threading.Thread):
         self.email_config = email_config
         self.smtp_server = smtp(email_config['smtp_server'], email_config['smtp_port'])
 
-    def send_email(self, work_item: EmailWorkItem):
-        print(f'Sending email to: {work_item.email}')
+    def send_email(self, email_details: EmailDetails):
 
+        print(f'Sending email to: {email_details.email_address}')
+
+        filename = os.path.basename(email_details.barcode_file)
+
+        # Create the email
         msg = MIMEMultipart()
-        filename = os.path.basename(work_item.barcodes_file)
-
         msg['From'] = self.email_config['user']
-        msg['To'] = work_item.email
+        msg['To'] = email_details.email_address
         msg['Subject'] = f'Barcodes: {filename}'
 
         # Attach the message body
@@ -52,7 +56,7 @@ class EmailWorker(threading.Thread):
         # Attach the output file
         try:
 
-            with open(work_item.barcodes_file) as attachment:
+            with open(email_details.barcode_file) as attachment:
                 message_attachment = MIMEBase('multipart', 'plain')
                 message_attachment.set_payload(attachment.read())
                 encoders.encode_base64(message_attachment)
@@ -61,7 +65,6 @@ class EmailWorker(threading.Thread):
 
         except OSError:
             print("There was an error reading the barcode output file while attaching it to the email")
-
 
         self.smtp_server.starttls()
 
@@ -75,6 +78,6 @@ class EmailWorker(threading.Thread):
 
     def run(self):
         while True:
-            email_work_item: EmailWorkItem = self.work_queue.get()
+            email_work_item = self.work_queue.get()
             self.send_email(email_work_item)
             self.work_queue.task_done()
