@@ -54,8 +54,8 @@ function startScraping() {
 
     let formData = new FormData();
 
-    formData.append("emailAddress", "thomas@tmadhavan.com");
-    formData.append("urlToScan", "www.tmadhavan.com");
+    formData.append("emailAddress", "test@email.com");
+    formData.append("urlToScan", "www.awesomewebsite.com");
 
      uploadRequest.onreadystatechange = () => {
         if (uploadRequest.readyState == 4) {
