@@ -18,6 +18,7 @@ class ConversionManager:
         self.email_queue = Queue()
 
         self.email_manager = EmailManager(self.email_queue, email_config)
-        self.pdf_conversion_manager = PdfManager(self.pdf_convert_queue, self.scan_queue)
-        self.scan_manager = ScanManager(self.scan_queue, self.email_queue)
+        self.scan_manager = ScanManager(self.scan_queue, self.email_manager)
+        self.pdf_conversion_manager = PdfManager(self.pdf_convert_queue, self.scan_manager)
+
 

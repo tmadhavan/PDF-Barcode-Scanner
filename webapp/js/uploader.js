@@ -1,4 +1,17 @@
+function emailIsValid(emailAddressInput) {
+    console.log("Checking email");
+    if (emailAddressInput.value == undefined || emailAddressInput.value == "") {
+        return false;
+    }
+    return true;
+}
 function uploadFile() {
+    var emailAddressInput = document.getElementById("email_input");
+    // TODO Add some actual validation and feedback in the UI
+    if (!emailIsValid(emailAddressInput)) {
+        console.error("No email address provided");
+        return;
+    }
     var uploadStatusDiv = document.getElementById("upload_status");
     var uploadFileInput = document.getElementById("file_input");
     var uploadRequest = new XMLHttpRequest();
@@ -9,7 +22,7 @@ function uploadFile() {
     var formData = new FormData();
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
-    formData.append("emailAddress", "thomas@tmadhavan.com");
+    formData.append("emailAddress", emailAddressInput.value);
     formData.append("urlToScan", "www.tmadhavan.com");
     uploadRequest.onreadystatechange = function () {
         if (uploadRequest.readyState == 4) {

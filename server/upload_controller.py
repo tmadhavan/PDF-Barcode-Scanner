@@ -1,14 +1,9 @@
 import os
-import sys
 import uuid
-from flask import Flask, request
-from flask_restful import Resource, Api, reqparse
+from flask import request
+from flask_restful import Resource
 from werkzeug.utils import secure_filename
-from flask_cors import CORS
 from server.conversion_manager import ConversionManager
-from server.emailer import EmailManager
-from server.pdf import PdfConversionDetails
-
 
 
 class UploadController(Resource):
@@ -45,20 +40,19 @@ class UploadController(Resource):
         # Save the PDF in its own folder, and pass on the file location to the PDF converter
         safe_filename = secure_filename(uploaded_file.filename)
         save_folder = os.path.join(self.upload_folder, str(uuid.uuid4()))
-        absolute_save_path = os.path.join(save_folder, safe_filename)
+        pdf_save_path = os.path.join(save_folder, safe_filename)
 
         try:
             os.mkdir(save_folder)
-            print(f'Saving file to {absolute_save_path}')
-            uploaded_file.save(absolute_save_path)
-            pdf_conversion_details = PdfConversionDetails(absolute_save_path, email_address)
-            self.converter.pdf_convert_queue.put(pdf_conversion_details)
+            print(f'Saving file to {pdf_save_path}')
+            uploaded_file.save(pdf_save_path)
+            self.converter.pdf_convert_queue.put((pdf_save_path, email_address))
 
-        except OSError:
-            if os.path.exists(absolute_save_path):
-                os.remove(absolute_save_path)
+        except OSError as e:
+            if os.path.exists(pdf_save_path):
+                os.remove(pdf_save_path)
             if os.path.exists(save_folder):
                 os.rmdir(save_folder)
-            return {'Error': 'Could not save file'}, 500
+            return {'Error': 'Could not save file: ' + e}, 500
 
         return {'Message': uploaded_file.filename}, 200

@@ -1,4 +1,21 @@
+function emailIsValid(emailAddressInput: HTMLInputElement): boolean {
+    console.log("Checking email")
+    if (emailAddressInput.value == undefined || emailAddressInput.value == "") {
+        return false;
+    }
+
+    return true;
+}
+
 function uploadFile() {
+
+    let emailAddressInput: HTMLInputElement = document.getElementById("email_input") as HTMLInputElement
+    // TODO Add some actual validation and feedback in the UI
+    if (!emailIsValid(emailAddressInput)) {
+        console.error("No email address provided");
+        return;
+    }
+
     let uploadStatusDiv: HTMLDivElement = document.getElementById("upload_status") as HTMLDivElement;
     let uploadFileInput: HTMLInputElement = document.getElementById("file_input") as HTMLInputElement;
     let uploadRequest = new XMLHttpRequest();
@@ -12,7 +29,7 @@ function uploadFile() {
 
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
-    formData.append("emailAddress", "thomas@tmadhavan.com");
+    formData.append("emailAddress", emailAddressInput.value);
     formData.append("urlToScan", "www.tmadhavan.com");
 
     uploadRequest.onreadystatechange = () => {
@@ -53,7 +70,6 @@ function startScraping() {
     let scrapingStatusDiv = document.getElementById("scraping_status");
 
     let formData = new FormData();
-
     formData.append("emailAddress", "test@email.com");
     formData.append("urlToScan", "www.awesomewebsite.com");
 
