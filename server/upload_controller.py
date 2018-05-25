@@ -3,7 +3,7 @@ import uuid
 from flask import request
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
-from server.conversion_manager import ConversionManager
+from server.app_manager import AppManager
 
 
 class UploadController(Resource):
@@ -13,9 +13,9 @@ class UploadController(Resource):
     EMAIL_FORM_INPUT_NAME = 'emailAddress'
     URL_SCAN_INPUT_NAME = "urlToScan"
 
-    def __init__(self,  upload_folder, email_config):
-        self.upload_folder = upload_folder
-        self.converter = ConversionManager(email_config)
+    def __init__(self,  upload_config, app_manager: AppManager):
+        self.upload_config = upload_config
+        self.converter = app_manager
 
     def allowed_file(self, filename: str) -> bool:
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in self.ALLOWED_FILETYPES
@@ -39,7 +39,7 @@ class UploadController(Resource):
 
         # Save the PDF in its own folder, and pass on the file location to the PDF converter
         safe_filename = secure_filename(uploaded_file.filename)
-        save_folder = os.path.join(self.upload_folder, str(uuid.uuid4()))
+        save_folder = os.path.join(self.upload_config['upload_folder'], str(uuid.uuid4()))
         pdf_save_path = os.path.join(save_folder, safe_filename)
 
         try:
@@ -53,6 +53,6 @@ class UploadController(Resource):
                 os.remove(pdf_save_path)
             if os.path.exists(save_folder):
                 os.rmdir(save_folder)
-            return {'Error': 'Could not save file: ' + e}, 500
+            return {'Error': 'Could not save file: ' + str(e)}, 500
 
         return {'Message': uploaded_file.filename}, 200

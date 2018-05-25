@@ -54,7 +54,7 @@ class PdfConverterThread(threading.Thread):
 
             if self.pdf_convert_result.returncode == 0:
                 print(f'{threading.currentThread().getName()} finished converting {pdf_path}')
-                self.scan_queue.put((ImageScanner(pdf_folder, output_file_prefix), email_address))
+                self.scan_queue.put((ImageScanner(pdf_folder, output_file_prefix, pdf_file), email_address))
             else:
                 print(f'{threading.currentThread().getName()} error converting {pdf_path}')
 

@@ -1,14 +1,10 @@
-import os
-import threading
-from server.barcode_scanners import Scanner, ImageScanner, UrlScanner
 from queue import Queue
-from subprocess import run, CompletedProcess
 from server.pdf import PdfManager
 from server.scanning import ScanManager
 from server.emailer import EmailManager
 
 
-class ConversionManager:
+class AppManager:
 
     MAX_THREADS = 3 
 

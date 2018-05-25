@@ -18,7 +18,7 @@ class ScannerThread(threading.Thread):
 
             scanner.scan()
 
-            self.email_queue.put((scanner.get_file_attachment_path(), email_address))
+            self.email_queue.put((scanner.get_file_attachment_path(), scanner.scan_job_name, email_address))
             self.scan_queue.task_done()
 
 

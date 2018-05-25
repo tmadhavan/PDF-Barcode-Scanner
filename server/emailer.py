@@ -33,11 +33,11 @@ class EmailThread(threading.Thread):
 
     def run(self):
         while True:
-            barcode_file, email_address = self.email_queue.get()
-            self.send_email(barcode_file, email_address)
+            file_to_attach_path, subject_job_name, email_address = self.email_queue.get()
+            self.send_email(file_to_attach_path, subject_job_name, email_address)
             self.email_queue.task_done()
 
-    def send_email(self, barcode_file, email_address):
+    def send_email(self, barcode_file, subject_job_name, email_address):
 
         print(f'Sending email to: {email_address}')
 
@@ -47,10 +47,10 @@ class EmailThread(threading.Thread):
         msg = MIMEMultipart()
         msg['From'] = self.email_config['user']
         msg['To'] = email_address
-        msg['Subject'] = f'Barcodes: {filename}'
+        msg['Subject'] = f'Your barcodes'
 
         # Attach the message body
-        message = f'Your barcodes for {filename} are attached'
+        message = f'Your barcodes for {subject_job_name} are attached'
         msg.attach(MIMEText(message, 'plain'))
 
         # Attach the output file
