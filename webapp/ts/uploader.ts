@@ -1,5 +1,5 @@
 function emailIsValid(emailAddressInput: HTMLInputElement): boolean {
-    console.log("Checking email")
+    console.log("Checking email");
     if (emailAddressInput.value == undefined || emailAddressInput.value == "") {
         return false;
     }
@@ -30,7 +30,7 @@ function uploadFile() {
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
     formData.append("emailAddress", emailAddressInput.value);
-    formData.append("urlToScan", "www.tmadhavan.com");
+    formData.append("urlToScan", "www.somesite.com");
 
     uploadRequest.onreadystatechange = () => {
         if (uploadRequest.readyState == 4) {
@@ -41,7 +41,7 @@ function uploadFile() {
                                              and error: ${uploadRequest.responseText}`
             }
         }
-    }
+    };
 
     uploadRequest.upload.addEventListener("load", () => {
             uploadStatusDiv.innerText = "File uploaded"
@@ -89,6 +89,7 @@ function startScraping() {
 }
 
 function sendRequest(req: XMLHttpRequest, data: FormData) {
+    // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
     req.open("POST", "http://localhost:5000/api/v1/upload");
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);

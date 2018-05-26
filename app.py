@@ -6,7 +6,7 @@ from flask_restful import Api
 from flask_cors import CORS
 
 from server.app_manager import AppManager
-from server.upload_controller import UploadController
+from server.controllers.upload_controller import UploadController
 
 app = Flask(__name__)
 

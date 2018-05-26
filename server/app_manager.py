@@ -1,7 +1,7 @@
 from queue import Queue
-from server.pdf import PdfManager
-from server.scanning import ScanManager
-from server.emailer import EmailManager
+from utils.pdf import PdfManager
+from scanning.manager import ScanManager
+from utils.emailer import EmailManager
 
 
 class AppManager:

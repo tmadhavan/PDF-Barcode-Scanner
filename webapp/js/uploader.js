@@ -23,7 +23,7 @@ function uploadFile() {
     console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
     formData.append("pdfToConvert", uploadFileInput.files[0]);
     formData.append("emailAddress", emailAddressInput.value);
-    formData.append("urlToScan", "www.tmadhavan.com");
+    formData.append("urlToScan", "www.somesite.com");
     uploadRequest.onreadystatechange = function () {
         if (uploadRequest.readyState == 4) {
             if (uploadRequest.status == 200) {
@@ -69,6 +69,7 @@ function startScraping() {
     sendRequest(uploadRequest, formData);
 }
 function sendRequest(req, data) {
+    // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
     req.open("POST", "http://localhost:5000/api/v1/upload");
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);

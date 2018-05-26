@@ -1,5 +1,4 @@
-import unittest
-from server.upload_controller import app
+from server.controllers.upload_controller import app
 from unittest import TestCase
 
 class TestIntegrations(TestCase):

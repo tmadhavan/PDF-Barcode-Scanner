@@ -4,7 +4,7 @@ from flask import request
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
 from server.app_manager import AppManager
-
+from validate_email import validate_email
 
 class UploadController(Resource):
 
@@ -36,6 +36,9 @@ class UploadController(Resource):
         
         if not self.allowed_file(uploaded_file.filename):
             return {'Error': 'This is not a PDF file'}, 400
+
+        if not email_address or not validate_email(email_address):
+            return {'Error': 'Invalid email address provided'}, 400
 
         # Save the PDF in its own folder, and pass on the file location to the PDF converter
         safe_filename = secure_filename(uploaded_file.filename)

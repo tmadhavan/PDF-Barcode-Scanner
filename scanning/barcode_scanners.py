@@ -1,6 +1,6 @@
 import os
 from urllib.parse import urlparse
-from server.barcode_extractor import scan_images
+from scanning.barcode_extractor import scan_images
 
 
 class Scanner:

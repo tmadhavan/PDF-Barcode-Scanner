@@ -3,8 +3,8 @@ import threading
 from queue import Queue
 from subprocess import CompletedProcess, run
 
-from server.barcode_scanners import ImageScanner
-from server.scanning import ScanManager
+from scanning.barcode_scanners import ImageScanner
+from scanning.manager import ScanManager
 
 
 class PdfManager:
@@ -21,12 +21,6 @@ class PdfManager:
             pdf_worker.start()
 
         self.work_queue.join()
-
-# class PdfConversionDetails:
-#
-#     def __init__(self, pdf_to_convert_path, email_address):
-#         self.pdf_to_convert = pdf_to_convert_path
-#         self.email_address = email_address
 
 
 class PdfConverterThread(threading.Thread):

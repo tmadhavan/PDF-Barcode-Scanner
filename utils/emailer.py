@@ -33,9 +33,10 @@ class EmailThread(threading.Thread):
 
     def run(self):
         while True:
-            file_to_attach_path, subject_job_name, email_address = self.email_queue.get()
-            self.send_email(file_to_attach_path, subject_job_name, email_address)
+            barcode_file, output_folder, subject_job_name, email_address = self.email_queue.get()
+            self.send_email(os.path.join(output_folder, barcode_file), subject_job_name, email_address)
             self.email_queue.task_done()
+
 
     def send_email(self, barcode_file, subject_job_name, email_address):
 
