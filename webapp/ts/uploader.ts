@@ -22,7 +22,7 @@ class Uploader {
     // TODO Add some actual validation
     if (!this.emailIsValid()) {
       console.error("No email address provided");
-      this.status("Please provide an email address", true);
+      this.status("Please provide an email address");
       return;
     }
 
@@ -57,11 +57,11 @@ class Uploader {
     });
 
     uploadRequest.upload.addEventListener("error", (event: Event) => {
-      this.status("File upload failed");
+      this.status("File upload failed", true);
     });
 
     uploadRequest.upload.addEventListener("abort", (event: Event) => {
-      this.status("File upload aborted");
+      this.status("File upload aborted", true);
     });
 
     uploadRequest.upload.addEventListener("progress", (event: ProgressEvent) => {
@@ -102,8 +102,14 @@ class Uploader {
   }
 
   sendRequest(req: XMLHttpRequest, data: FormData) {
-    // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
-    req.open("POST", "http://localhost:5000/api/v1/upload");
+
+    req.addEventListener("timeout", (event) => {
+      this.status("Request timed out", true);
+    });
+
+    req.open("POST", "http://vps547804.ovh.net:6000/api/v1/upload");
+    // req.open("POST", "http://localhost:5000/api/v1/upload");
+    req.timeout = 5000;
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);
   }

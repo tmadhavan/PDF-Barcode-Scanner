@@ -14,7 +14,7 @@ var Uploader = /** @class */ (function () {
         // TODO Add some actual validation
         if (!this.emailIsValid()) {
             console.error("No email address provided");
-            this.status("Please provide an email address", true);
+            this.status("Please provide an email address");
             return;
         }
         var uploadRequest = new XMLHttpRequest();
@@ -42,10 +42,10 @@ var Uploader = /** @class */ (function () {
             _this.status("File uploaded");
         });
         uploadRequest.upload.addEventListener("error", function (event) {
-            _this.status("File upload failed");
+            _this.status("File upload failed", true);
         });
         uploadRequest.upload.addEventListener("abort", function (event) {
-            _this.status("File upload aborted");
+            _this.status("File upload aborted", true);
         });
         uploadRequest.upload.addEventListener("progress", function (event) {
             if (event.lengthComputable) {
@@ -80,8 +80,13 @@ var Uploader = /** @class */ (function () {
         // TODO This is going to be a bit more work than first thought :-D
     };
     Uploader.prototype.sendRequest = function (req, data) {
-        // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
-        req.open("POST", "http://localhost:5000/api/v1/upload");
+        var _this = this;
+        req.addEventListener("timeout", function (event) {
+            _this.status("Request timed out", true);
+        });
+        req.open("POST", "http://vps547804.ovh.net:6000/api/v1/upload");
+        // req.open("POST", "http://localhost:5000/api/v1/upload");
+        req.timeout = 5000;
         req.setRequestHeader("Access-Control-Allow-Origin", "*");
         req.send(data);
     };
