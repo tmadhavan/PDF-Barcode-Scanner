@@ -5,6 +5,10 @@ from utils.emailer import EmailManager
 
 
 class AppManager:
+    """
+    Takes care of the creation of various work queues and manager objects for emails, PDF conversion, and barcode
+    scanning.
+    """
 
     MAX_THREADS = 3 
 

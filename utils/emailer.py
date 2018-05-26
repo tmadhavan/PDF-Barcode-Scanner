@@ -1,3 +1,4 @@
+import shutil
 from smtplib import SMTP as smtp
 from email.mime.multipart import MIMEMultipart, MIMEBase
 from email.mime.text import MIMEText
@@ -5,6 +6,8 @@ from email import encoders
 import threading
 import os
 from queue import Queue
+
+from scanning.scanners import Scanner
 
 
 class EmailManager:
@@ -23,6 +26,12 @@ class EmailManager:
         self.email_queue.join()
 
 
+class EmailDetails:
+    def __init__(self, scanner: Scanner, email_address: str):
+        self.scanner = scanner
+        self.email_address = email_address
+
+
 class EmailThread(threading.Thread):
 
     def __init__(self, email_work_queue, email_config):
@@ -33,14 +42,19 @@ class EmailThread(threading.Thread):
 
     def run(self):
         while True:
-            barcode_file, output_folder, subject_job_name, email_address = self.email_queue.get()
-            self.send_email(os.path.join(output_folder, barcode_file), subject_job_name, email_address)
+            email_details: EmailDetails = self.email_queue.get()
+            scanner = email_details.scanner
+            email_address = email_details.email_address
+
+            self.send_email(os.path.join(scanner.output_folder, scanner.barcode_file),
+                            scanner.job_label, email_address)
+
+            # Remove the output folder and its contents
+            print (f"Deleting {scanner.output_folder}")
+            shutil.rmtree(scanner.output_folder)
             self.email_queue.task_done()
 
-
     def send_email(self, barcode_file, subject_job_name, email_address):
-
-        print(f'Sending email to: {email_address}')
 
         filename = os.path.basename(barcode_file)
 
@@ -64,17 +78,19 @@ class EmailThread(threading.Thread):
                 message_attachment.add_header("Content-Disposition", "attachment", filename=filename)
                 msg.attach(message_attachment)
 
+            self.smtp_server.starttls()
+
+            # Login Credentials for sending the mail
+            self.smtp_server.login(self.email_config['user'], self.email_config['password'])
+
+            # send the message via the server.
+            print(f'Sending email to: {email_address}')
+            self.smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
+
         except OSError:
             print("There was an error reading the barcode output file while attaching it to the email")
 
-        self.smtp_server.starttls()
-
-        # Login Credentials for sending the mail
-        self.smtp_server.login(self.email_config['user'], self.email_config['password'])
-
-        # send the message via the server.
-        self.smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
-
-        self.smtp_server.quit()
+        finally:
+            self.smtp_server.quit()
 
 

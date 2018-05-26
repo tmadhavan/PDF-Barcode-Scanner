@@ -1,5 +1,6 @@
 local.properties
 barcodes.txt
+requirements.txt
 uploads/**
 
 # IDEA STUFF
@@ -161,3 +162,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.idea/deployment.xml
+.idea/inspectionProfiles/
+.idea/webServers.xml

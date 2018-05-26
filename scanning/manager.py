@@ -1,6 +1,6 @@
 import threading
 from queue import Queue
-from utils.emailer import EmailManager
+from utils.emailer import EmailManager, EmailDetails
 
 
 class ScannerThread(threading.Thread):
@@ -18,8 +18,7 @@ class ScannerThread(threading.Thread):
 
             scanner.scan()
 
-            self.email_queue.put((scanner.output_folder, scanner.barcode_output_filename, scanner.scan_job_name,
-                                  email_address))
+            self.email_queue.put(EmailDetails(scanner, email_address))
             self.scan_queue.task_done()
 
 

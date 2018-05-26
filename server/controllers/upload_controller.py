@@ -1,4 +1,5 @@
 import os
+import shutil
 import uuid
 from flask import request
 from flask_restful import Resource
@@ -52,10 +53,8 @@ class UploadController(Resource):
             self.converter.pdf_convert_queue.put((pdf_save_path, email_address))
 
         except OSError as e:
-            if os.path.exists(pdf_save_path):
-                os.remove(pdf_save_path)
             if os.path.exists(save_folder):
-                os.rmdir(save_folder)
+                shutil.rmtree(save_folder)
             return {'Error': 'Could not save file: ' + str(e)}, 500
 
         return {'Message': uploaded_file.filename}, 200

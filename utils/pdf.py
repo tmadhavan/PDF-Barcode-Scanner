@@ -3,7 +3,7 @@ import threading
 from queue import Queue
 from subprocess import CompletedProcess, run
 
-from scanning.barcode_scanners import ImageScanner
+from scanning.scanners import ImageScanner
 from scanning.manager import ScanManager
 
 
