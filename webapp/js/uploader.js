@@ -1,77 +1,90 @@
-function emailIsValid(emailAddressInput) {
-    console.log("Checking email");
-    if (emailAddressInput.value == undefined || emailAddressInput.value == "") {
-        return false;
+var Uploader = /** @class */ (function () {
+    function Uploader() {
+        this.statusDiv = document.getElementById("status");
+        this.emailInput = document.getElementById("email_input");
+        this.uploadFileInput = document.getElementById("file_input");
     }
-    return true;
-}
-function uploadFile() {
-    var emailAddressInput = document.getElementById("email_input");
-    // TODO Add some actual validation and feedback in the UI
-    if (!emailIsValid(emailAddressInput)) {
-        console.error("No email address provided");
-        return;
-    }
-    var uploadStatusDiv = document.getElementById("upload_status");
-    var uploadFileInput = document.getElementById("file_input");
-    var uploadRequest = new XMLHttpRequest();
-    if (uploadFileInput.files.length == 0) {
-        console.error("No file provided!");
-        return;
-    }
-    var formData = new FormData();
-    console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
-    formData.append("pdfToConvert", uploadFileInput.files[0]);
-    formData.append("emailAddress", emailAddressInput.value);
-    formData.append("urlToScan", "www.somesite.com");
-    uploadRequest.onreadystatechange = function () {
-        if (uploadRequest.readyState == 4) {
-            if (uploadRequest.status == 200) {
-                uploadStatusDiv.innerText = "File uploaded";
+    Uploader.prototype.emailIsValid = function () {
+        console.log("Checking email");
+        return !(this.emailInput.value == undefined || this.emailInput.value == "");
+    };
+    Uploader.prototype.uploadFile = function () {
+        var _this = this;
+        this.clearStatus();
+        // TODO Add some actual validation
+        if (!this.emailIsValid()) {
+            console.error("No email address provided");
+            this.status("Please provide an email address", true);
+            return;
+        }
+        var uploadRequest = new XMLHttpRequest();
+        if (this.uploadFileInput.files.length == 0) {
+            console.error("No file provided!");
+            this.status("Please provide a PDF file to scan");
+            return;
+        }
+        var formData = new FormData();
+        console.log("Appending file: " + JSON.stringify(this.uploadFileInput.files[0]));
+        formData.append("pdfToConvert", this.uploadFileInput.files[0]);
+        formData.append("emailAddress", this.emailInput.value);
+        formData.append("urlToScan", "www.somesite.com");
+        uploadRequest.onreadystatechange = function () {
+            if (uploadRequest.readyState == 4) {
+                if (uploadRequest.status == 200) {
+                    _this.status("File uploaded");
+                }
+                else {
+                    _this.status("Upload failed with status: " + uploadRequest.status + "\n                                             and error: " + uploadRequest.responseText);
+                }
             }
-            else {
-                uploadStatusDiv.innerText = "Upload failed with status: " + uploadRequest.status + "\n                                             and error: " + uploadRequest.responseText;
+        };
+        uploadRequest.upload.addEventListener("load", function () {
+            _this.status("File uploaded");
+        });
+        uploadRequest.upload.addEventListener("error", function (event) {
+            _this.status("File upload failed");
+        });
+        uploadRequest.upload.addEventListener("abort", function (event) {
+            _this.status("File upload aborted");
+        });
+        uploadRequest.upload.addEventListener("progress", function (event) {
+            if (event.lengthComputable) {
+                _this.status("File upload progress is " + event.loaded / event.total * 100);
             }
+        });
+        this.sendRequest(uploadRequest, formData);
+    };
+    Uploader.prototype.clearStatus = function () {
+        this.status("", false, true);
+        this.statusDiv.hidden = true;
+    };
+    Uploader.prototype.status = function (statusMessage, isError, hidden) {
+        if (isError === void 0) { isError = false; }
+        if (isError) {
+            this.statusDiv.classList.add("alert-danger");
+            this.statusDiv.classList.remove("alert-info");
+        }
+        else {
+            this.statusDiv.classList.add("alert-info");
+            this.statusDiv.classList.remove("alert-danger");
+        }
+        this.statusDiv.innerText = statusMessage;
+        if (hidden) {
+            this.statusDiv.hidden = hidden;
+        }
+        else {
+            this.statusDiv.hidden = false;
         }
     };
-    uploadRequest.upload.addEventListener("load", function () {
-        uploadStatusDiv.innerText = "File uploaded";
-    });
-    uploadRequest.upload.addEventListener("error", function (event) {
-        uploadStatusDiv.innerText = "File upload failed";
-    });
-    uploadRequest.upload.addEventListener("abort", function (event) {
-        uploadStatusDiv.innerText = "File upload aborted";
-    });
-    uploadRequest.upload.addEventListener("progress", function (event) {
-        if (event.lengthComputable) {
-            uploadStatusDiv.innerText = "File upload progress is " + event.loaded / event.total * 100;
-        }
-    });
-    sendRequest(uploadRequest, formData);
-}
-function startScraping() {
-    var uploadRequest = new XMLHttpRequest();
-    var scrapingStatusDiv = document.getElementById("scraping_status");
-    var formData = new FormData();
-    formData.append("emailAddress", "test@email.com");
-    formData.append("urlToScan", "www.awesomewebsite.com");
-    uploadRequest.onreadystatechange = function () {
-        if (uploadRequest.readyState == 4) {
-            if (uploadRequest.status == 200) {
-                scrapingStatusDiv.innerText = "File uploaded";
-            }
-            else {
-                scrapingStatusDiv.innerText = "Upload failed with status: " + uploadRequest.status + "\n                                             and error: " + uploadRequest.responseText;
-            }
-        }
+    Uploader.prototype.startScraping = function () {
+        // TODO This is going to be a bit more work than first thought :-D
     };
-    sendRequest(uploadRequest, formData);
-}
-function sendRequest(req, data) {
-    // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
-    req.open("POST", "http://localhost:5000/api/v1/upload");
-    req.setRequestHeader("Access-Control-Allow-Origin", "*");
-    req.send(data);
-}
+    Uploader.prototype.sendRequest = function (req, data) {
+        // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
+        req.open("POST", "http://localhost:5000/api/v1/upload");
+        req.setRequestHeader("Access-Control-Allow-Origin", "*");
+        req.send(data);
+    };
+    return Uploader;
+}());
 //# sourceMappingURL=uploader.js.map

@@ -1,96 +1,111 @@
-function emailIsValid(emailAddressInput: HTMLInputElement): boolean {
+class Uploader {
+
+  statusDiv: HTMLDivElement;
+  emailInput: HTMLInputElement;
+  uploadFileInput: HTMLInputElement;
+
+  constructor() {
+    this.statusDiv = document.getElementById("status") as HTMLDivElement;
+    this.emailInput = document.getElementById("email_input") as HTMLInputElement;
+    this.uploadFileInput = document.getElementById("file_input") as HTMLInputElement;
+  }
+
+  emailIsValid(): boolean {
     console.log("Checking email");
-    if (emailAddressInput.value == undefined || emailAddressInput.value == "") {
-        return false;
+    return !(this.emailInput.value == undefined || this.emailInput.value == "");
+  }
+
+  uploadFile() {
+
+    this.clearStatus();
+
+    // TODO Add some actual validation
+    if (!this.emailIsValid()) {
+      console.error("No email address provided");
+      this.status("Please provide an email address", true);
+      return;
     }
 
-    return true;
-}
-
-function uploadFile() {
-
-    let emailAddressInput: HTMLInputElement = document.getElementById("email_input") as HTMLInputElement
-    // TODO Add some actual validation and feedback in the UI
-    if (!emailIsValid(emailAddressInput)) {
-        console.error("No email address provided");
-        return;
-    }
-
-    let uploadStatusDiv: HTMLDivElement = document.getElementById("upload_status") as HTMLDivElement;
-    let uploadFileInput: HTMLInputElement = document.getElementById("file_input") as HTMLInputElement;
     let uploadRequest = new XMLHttpRequest();
 
-    if (uploadFileInput.files.length == 0) {
-        console.error("No file provided!");
-        return
+    if (this.uploadFileInput.files.length == 0) {
+      console.error("No file provided!");
+      this.status("Please provide a PDF file to scan");
+      return
     }
 
     let formData = new FormData();
 
-    console.log("Appending file: " + JSON.stringify(uploadFileInput.files[0]));
-    formData.append("pdfToConvert", uploadFileInput.files[0]);
-    formData.append("emailAddress", emailAddressInput.value);
+    console.log("Appending file: " + JSON.stringify(this.uploadFileInput.files[0]));
+    formData.append("pdfToConvert", this.uploadFileInput.files[0]);
+    formData.append("emailAddress", this.emailInput.value);
     formData.append("urlToScan", "www.somesite.com");
 
     uploadRequest.onreadystatechange = () => {
-        if (uploadRequest.readyState == 4) {
-            if (uploadRequest.status == 200) {
-                uploadStatusDiv.innerText = "File uploaded"
-            } else {
-                uploadStatusDiv.innerText = `Upload failed with status: ${uploadRequest.status}
-                                             and error: ${uploadRequest.responseText}`
-            }
+      if (uploadRequest.readyState == 4) {
+        if (uploadRequest.status == 200) {
+          this.status("File uploaded");
+        } else {
+          this.status(`Upload failed with status: ${uploadRequest.status}
+                                             and error: ${uploadRequest.responseText}`)
         }
+      }
     };
 
     uploadRequest.upload.addEventListener("load", () => {
-            uploadStatusDiv.innerText = "File uploaded"
+      this.status("File uploaded");
     });
 
     uploadRequest.upload.addEventListener("error", (event: Event) => {
-        uploadStatusDiv.innerText = "File upload failed"
+      this.status("File upload failed");
     });
 
     uploadRequest.upload.addEventListener("abort", (event: Event) => {
-        uploadStatusDiv.innerText = "File upload aborted"
+      this.status("File upload aborted");
     });
 
     uploadRequest.upload.addEventListener("progress", (event: ProgressEvent) => {
-        if (event.lengthComputable) {
-            uploadStatusDiv.innerText = `File upload progress is ${event.loaded / event.total * 100}`
-        }
+      if (event.lengthComputable) {
+        this.status(`File upload progress is ${event.loaded / event.total * 100}`);
+      }
     });
 
-    sendRequest(uploadRequest, formData);
+    this.sendRequest(uploadRequest, formData);
 
-}
+  }
 
-function startScraping() {
-    let uploadRequest = new XMLHttpRequest();
-    let scrapingStatusDiv = document.getElementById("scraping_status");
+  clearStatus() {
+    this.status("", false, true);
+    this.statusDiv.hidden = true;
+  }
 
-    let formData = new FormData();
-    formData.append("emailAddress", "test@email.com");
-    formData.append("urlToScan", "www.awesomewebsite.com");
+  status(statusMessage: string, isError: boolean = false, hidden?: boolean) {
 
-     uploadRequest.onreadystatechange = () => {
-        if (uploadRequest.readyState == 4) {
-            if (uploadRequest.status == 200) {
-                scrapingStatusDiv.innerText = "File uploaded"
-            } else {
-                scrapingStatusDiv.innerText = `Upload failed with status: ${uploadRequest.status}
-                                             and error: ${uploadRequest.responseText}`
-            }
-        }
+    if (isError) {
+      this.statusDiv.classList.add("alert-danger");
+      this.statusDiv.classList.remove("alert-info");
+    } else {
+      this.statusDiv.classList.add("alert-info");
+      this.statusDiv.classList.remove("alert-danger");
     }
+    this.statusDiv.innerText = statusMessage;
 
-    sendRequest(uploadRequest, formData);
+    if (hidden) {
+      this.statusDiv.hidden = hidden;
+    } else {
+      this.statusDiv.hidden = false;
+    }
+  }
 
-}
+  startScraping() {
+    // TODO This is going to be a bit more work than first thought :-D
+  }
 
-function sendRequest(req: XMLHttpRequest, data: FormData) {
+  sendRequest(req: XMLHttpRequest, data: FormData) {
     // req.open("POST", "http://vps547804.ovh.net:5000/api/v1/upload");
     req.open("POST", "http://localhost:5000/api/v1/upload");
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);
+  }
 }
+
