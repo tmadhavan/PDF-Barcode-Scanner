@@ -16,7 +16,8 @@ class AppManager:
         self.email_queue = Queue()
 
         self.email_manager = EmailManager(self.email_queue, email_config)
-        self.scan_manager = ScanManager(self.scan_queue, self.email_manager)
+        self.scan_manager = ScanManager(self.scan_queue, self.email_queue)
+
 
 
 
