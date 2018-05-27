@@ -6,6 +6,7 @@ from email import encoders
 import threading
 import os
 from queue import Queue
+import logging
 
 from scanning.scanners import Scanner
 
@@ -38,6 +39,7 @@ class EmailThread(threading.Thread):
         self.email_queue = email_work_queue
         self.email_config = email_config
         self.smtp_server = smtp(email_config['smtp_server'], email_config['smtp_port'])
+        self.logger = logging.getLogger()
         super().__init__()
 
     def run(self):
@@ -50,6 +52,7 @@ class EmailThread(threading.Thread):
                             scanner.job_label, email_address)
 
             # Remove the output folder and its contents
+            self.logger.info(f"Deleting {scanner.output_folder}")
             print (f"Deleting {scanner.output_folder}")
             shutil.rmtree(scanner.output_folder)
             self.email_queue.task_done()
@@ -87,10 +90,10 @@ class EmailThread(threading.Thread):
             print(f'Sending email to: {email_address}')
             self.smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
 
-        except OSError:
-            print("There was an error reading the barcode output file while attaching it to the email")
-
-        finally:
             self.smtp_server.quit()
+
+        except OSError:
+            print(f'There was an error reading the barcode output file ({barcode_file}) while attaching it to the email'
+                  f' for {email_address}')
 
 

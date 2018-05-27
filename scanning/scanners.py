@@ -1,6 +1,6 @@
 import os
 from urllib.parse import urlparse
-from scanning.barcode_extractor import scan_images
+from scanning.pdf_scanner import scan_pdf
 
 
 class Scanner:
@@ -15,30 +15,39 @@ class Scanner:
         raise NotImplementedError
 
 
-class ImageScanner(Scanner):
+class PdfScanner(Scanner):
 
-    def __init__(self, scan_folder, barcode_file_prefix, job_label):
+    def __init__(self, path_to_scan_pdf, barcode_file_prefix=None, job_label=None):
         """
         Create a Scanner that will look for images (default PNG) in a folder, scan them for barcodes, and output the
         detected barcodes to a text file.
 
-        :param scan_folder: The folder to scan for images
+        :param path_to_scan_pdf: The folder to scan for images
         :param barcode_file_prefix: The filename prefix for the output file (e.g. "myfile" will produce an output file
         called "myfile-barcodes.txt"
         """
         # Always output to the input folder
-        output_folder = scan_folder
-        super().__init__(scan_folder, output_folder, barcode_file_prefix, job_label)
+        output_folder = os.path.dirname(path_to_scan_pdf)
+        filename = os.path.basename(path_to_scan_pdf)
+
+        # The job label (used for email subject) and the barcode file prefix default to the filename (with extension)
+        job_label = job_label or filename
+        barcode_file_prefix = barcode_file_prefix or filename
+        super().__init__(path_to_scan_pdf, output_folder, barcode_file_prefix, job_label)
 
     def scan(self):
-        # scan_target is a folder of images
-        scan_images(self.scan_target, os.path.join(self.output_folder, self.barcode_file))
+        scan_pdf(self.scan_target, self.barcode_file)
 
 
 class UrlScanner(Scanner):
 
-    def __init__(self, scan_url, output_folder, barcode_file_prefix, job_label=None):
-        job_label = job_label or urlparse(scan_url)[1]
+    def __init__(self, scan_url, output_folder, barcode_file_prefix=None, job_label=None):
+
+        # The job label (used for email subject) and the barcode file prefix default to the domain portion of the
+        # scanned URL ('http://www.somedomain.com/thing/to/scan' -> 'www.somedomain.com')
+        url_domain = urlparse(scan_url)[1]
+        job_label = job_label or url_domain
+        barcode_file_prefix = barcode_file_prefix or url_domain
         super().__init__(scan_url, output_folder, barcode_file_prefix, job_label)
 
     def scan(self):

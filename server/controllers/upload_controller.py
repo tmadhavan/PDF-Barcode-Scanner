@@ -4,6 +4,8 @@ import uuid
 from flask import request
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
+
+from scanning.scanners import PdfScanner
 from server.app_manager import AppManager
 from validate_email import validate_email
 
@@ -24,6 +26,8 @@ class UploadController(Resource):
     def get(self) -> dict:
         return {'Message': 'POST to this endpoint'}
 
+    # TODO At the moment we're just dealing with PDF scanning. Add a req parameter to differentiate between URL and
+    # PDF scanning
     def post(self) -> tuple:
         # get() rather than ['key'] returns a default of None rather than raising KeyError
         uploaded_file = request.files.get(self.HTML_INPUT_NAME)
@@ -41,6 +45,8 @@ class UploadController(Resource):
         if not email_address or not validate_email(email_address):
             return {'Error': 'Invalid email address provided'}, 400
 
+        # IF PDF
+
         # Save the PDF in its own folder, and pass on the file location to the PDF converter
         safe_filename = secure_filename(uploaded_file.filename)
         save_folder = os.path.join(self.upload_config['upload_folder'], str(uuid.uuid4()))
@@ -50,7 +56,7 @@ class UploadController(Resource):
             os.mkdir(save_folder)
             print(f'Saving file to {pdf_save_path}')
             uploaded_file.save(pdf_save_path)
-            self.converter.pdf_convert_queue.put((pdf_save_path, email_address))
+            self.converter.scan_queue.put((PdfScanner(pdf_save_path), email_address))
 
         except OSError as e:
             if os.path.exists(save_folder):
@@ -58,3 +64,5 @@ class UploadController(Resource):
             return {'Error': 'Could not save file: ' + str(e)}, 500
 
         return {'Message': uploaded_file.filename}, 200
+
+        # TODO OTHERWISE, DO SOME URL SCANNING STUFF
