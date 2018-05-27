@@ -32,7 +32,9 @@ class PdfScanner(Scanner):
 
         # The job label (used for email subject) and the barcode file prefix default to the filename (with extension)
         job_label = job_label or filename
-        barcode_file_prefix = barcode_file_prefix or filename
+
+        # Barcode file prefix defaults to the filename (without extension)
+        barcode_file_prefix = barcode_file_prefix or filename.split(".")[0]
         super().__init__(path_to_scan_pdf, output_folder, barcode_file_prefix, job_label)
 
     def scan(self):
