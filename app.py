@@ -1,6 +1,8 @@
 import os
 import sys
 import configparser
+import logging
+
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
@@ -34,6 +36,7 @@ app_manager = AppManager(email_config)
 
 api.add_resource(UploadController, '/upload',
                  resource_class_kwargs={'upload_config': upload_config, 'app_manager': app_manager})
+
 
 if __name__ == "__main__":
     app.run(debug=False)

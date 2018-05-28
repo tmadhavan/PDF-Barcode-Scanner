@@ -1,5 +1,5 @@
 from queue import Queue
-from scanning.manager import ScanManager
+from scanning.scan_manager import ScanManager
 from utils.emailer import EmailManager
 
 
