@@ -84,8 +84,7 @@ var Uploader = /** @class */ (function () {
         req.addEventListener("timeout", function (event) {
             _this.status("Request timed out", true);
         });
-        req.open("POST", "http://localhost:5000/api/v1/upload");
-        // req.open("POST", "http://vps547804.ovh.net/api/v1/upload");
+        req.open("POST", "http://vps547804.ovh.net/api/v1/upload");
         req.setRequestHeader("Access-Control-Allow-Origin", "*");
         req.send(data);
     };
