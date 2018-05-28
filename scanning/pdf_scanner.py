@@ -33,6 +33,7 @@ def scan_pdf(path_to_pdf: str, output_file: str):
         try:
             potential_barcodes = parse_potential_barcodes(pdf_text_output_file_path)
             if len(potential_barcodes) > 0:
+                print(f"Appending {potential_barcodes}")
                 barcode_output_file.write("Potential barcodes from PDF -> text conversion: \n")
                 barcode_output_file.writelines(potential_barcodes)
                 barcode_output_file.write("\n\nPotential barcodes from PDF -> image scanning: \n")
@@ -125,7 +126,6 @@ def parse_potential_barcodes(text_file: str) -> list:
             for group in matches:
                 for potential_barcode in group:
                     if len(potential_barcode) >= 8:
-                        print(f"Appending {potential_barcode}")
                         potential_barcodes.append(potential_barcode + '\n')
 
     return potential_barcodes
