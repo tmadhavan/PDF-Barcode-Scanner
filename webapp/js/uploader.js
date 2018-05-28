@@ -49,7 +49,7 @@ var Uploader = /** @class */ (function () {
         });
         uploadRequest.upload.addEventListener("progress", function (event) {
             if (event.lengthComputable) {
-                _this.status("File upload progress is " + event.loaded / event.total * 100);
+                _this.status("File upload progress is " + Math.floor(event.loaded / event.total) * 100);
             }
         });
         this.sendRequest(uploadRequest, formData);
@@ -84,9 +84,7 @@ var Uploader = /** @class */ (function () {
         req.addEventListener("timeout", function (event) {
             _this.status("Request timed out", true);
         });
-        req.open("POST", "http://vps547804.ovh.net:6000/api/v1/upload");
-        // req.open("POST", "http://localhost:5000/api/v1/upload");
-        req.timeout = 5000;
+        req.open("POST", "http://vps547804.ovh.net/api/v1/upload");
         req.setRequestHeader("Access-Control-Allow-Origin", "*");
         req.send(data);
     };

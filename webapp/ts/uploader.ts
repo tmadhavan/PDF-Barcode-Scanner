@@ -66,7 +66,7 @@ class Uploader {
 
     uploadRequest.upload.addEventListener("progress", (event: ProgressEvent) => {
       if (event.lengthComputable) {
-        this.status(`File upload progress is ${event.loaded / event.total * 100}`);
+        this.status(`File upload progress is ${Math.floor(event.loaded / event.total) * 100}`);
       }
     });
 
@@ -107,9 +107,7 @@ class Uploader {
       this.status("Request timed out", true);
     });
 
-    req.open("POST", "http://vps547804.ovh.net:6000/api/v1/upload");
-    // req.open("POST", "http://localhost:5000/api/v1/upload");
-    req.timeout = 5000;
+    req.open("POST", "http://vps547804.ovh.net/api/v1/upload");
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);
   }
