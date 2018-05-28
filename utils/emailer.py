@@ -12,7 +12,7 @@ from scanning.scanners import Scanner
 
 class EmailManager:
 
-    MAX_THREADS = 2
+    MAX_THREADS = 3
 
     def __init__(self, email_queue: Queue, email_config, max_threads=MAX_THREADS):
 
@@ -22,6 +22,8 @@ class EmailManager:
             email_thread = EmailThread(self.email_queue, email_config)
             email_thread.setDaemon(True)
             email_thread.start()
+
+        self.email_queue.join()
 
 
 class EmailDetails:

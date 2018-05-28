@@ -1,3 +1,4 @@
+import shutil
 import threading
 from queue import Queue
 
@@ -22,15 +23,21 @@ class ScannerThread(threading.Thread):
                 scanner.scan()
                 self.email_manager.email_queue.put(EmailDetails(scanner, email_address))
 
+            # TODO centralise the cleanup code instead of littering shutil.rmtree all over the place
             except ScanError as se:
+                shutil.rmtree(scanner.output_folder)
                 print("ERROR SCANNING FILE: " + se.scanned_file)
+
+            except OSError:
+                shutil.rmtree(scanner.output_folder)
+                print("Unknown error (OSError) scanning file")
 
             self.scan_queue.task_done()
 
 
 class ScanManager:
 
-    MAX_THREADS = 2
+    MAX_THREADS = 3
 
     def __init__(self, scan_queue: Queue, email_manager: EmailManager, max_threads=MAX_THREADS):
 

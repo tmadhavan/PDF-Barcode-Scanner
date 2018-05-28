@@ -49,7 +49,7 @@ var Uploader = /** @class */ (function () {
         });
         uploadRequest.upload.addEventListener("progress", function (event) {
             if (event.lengthComputable) {
-                _this.status("File upload progress is " + event.loaded / event.total * 100);
+                _this.status("File upload progress is " + Math.floor(event.loaded / event.total) * 100);
             }
         });
         this.sendRequest(uploadRequest, formData);

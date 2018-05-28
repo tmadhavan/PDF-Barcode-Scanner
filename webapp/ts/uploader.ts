@@ -66,7 +66,7 @@ class Uploader {
 
     uploadRequest.upload.addEventListener("progress", (event: ProgressEvent) => {
       if (event.lengthComputable) {
-        this.status(`File upload progress is ${event.loaded / event.total * 100}`);
+        this.status(`File upload progress is ${Math.floor(event.loaded / event.total) * 100}`);
       }
     });
 
