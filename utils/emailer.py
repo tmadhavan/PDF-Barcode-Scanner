@@ -1,12 +1,11 @@
 import shutil
-from smtplib import SMTP as smtp
+from smtplib import SMTP_SSL as smtp, SMTPHeloError, SMTPNotSupportedError
 from email.mime.multipart import MIMEMultipart, MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 import threading
 import os
 from queue import Queue
-import logging
 
 from scanning.scanners import Scanner
 
@@ -24,8 +23,6 @@ class EmailManager:
             email_thread.setDaemon(True)
             email_thread.start()
 
-        self.email_queue.join()
-
 
 class EmailDetails:
     def __init__(self, scanner: Scanner, email_address: str):
@@ -39,6 +36,7 @@ class EmailThread(threading.Thread):
         self.email_queue = email_work_queue
         self.email_config = email_config
         # self.smtp_server = smtp(email_config['smtp_server'], email_config['smtp_port'])
+        self.smtp_server = smtp(email_config['smtp_server'], 465)
         super().__init__()
 
     def run(self):
@@ -49,58 +47,60 @@ class EmailThread(threading.Thread):
             email_address = email_details.email_address
 
             try:
-                send_email(os.path.join(scanner.output_folder, scanner.barcode_file),
-                                scanner.job_label, email_address, self.email_config)
+                self.send_email(os.path.join(scanner.output_folder, scanner.barcode_file),
+                                scanner.job_label, email_address)
 
-            except OSError:
+            except SMTPHeloError:
+                print("Sending email failed")
+
+            except SMTPNotSupportedError:
+                print("Sending email failed")
+
+            except RuntimeError:
                 print("Sending email failed")
 
             finally:
                 # Remove the output folder and its contents
-                print (f"Deleting {scanner.output_folder}")
+                print (f"Deleting {scanner.output_folder}", flush=True)
                 shutil.rmtree(scanner.output_folder)
                 self.email_queue.task_done()
 
+    def send_email(self, barcode_file, subject_job_name, email_address):
 
-def send_email(barcode_file, subject_job_name, email_address, email_config):
+        filename = os.path.basename(barcode_file)
 
-    filename = os.path.basename(barcode_file)
+        # Create the email
+        msg = MIMEMultipart()
+        msg['From'] = self.email_config['user']
+        msg['To'] = email_address
+        msg['Subject'] = f'Your barcodes'
 
-    # Create the email
-    msg = MIMEMultipart()
-    msg['From'] = email_config['user']
-    msg['To'] = email_address
-    msg['Subject'] = f'Your barcodes'
+        # Attach the message body
+        message = f'Your barcodes for {subject_job_name} are attached'
+        msg.attach(MIMEText(message, 'plain'))
 
-    # Attach the message body
-    message = f'Your barcodes for {subject_job_name} are attached'
-    msg.attach(MIMEText(message, 'plain'))
+        # Attach the output file
+        try:
 
-    # Attach the output file
-    try:
+            with open(barcode_file) as attachment:
+                message_attachment = MIMEBase('multipart', 'plain')
+                message_attachment.set_payload(attachment.read())
+                encoders.encode_base64(message_attachment)
+                message_attachment.add_header("Content-Disposition", "attachment", filename=filename)
+                msg.attach(message_attachment)
 
-        with open(barcode_file) as attachment:
-            message_attachment = MIMEBase('multipart', 'plain')
-            message_attachment.set_payload(attachment.read())
-            encoders.encode_base64(message_attachment)
-            message_attachment.add_header("Content-Disposition", "attachment", filename=filename)
-            msg.attach(message_attachment)
+        except OSError as e:
+            print(f'There was an error reading the barcode output file ({barcode_file}) while attaching it to the email'
+                  f' for {email_address}')
+            raise e
 
-    except OSError as e:
-        print(f'There was an error reading the barcode output file ({barcode_file}) while attaching it to the email'
-              f' for {email_address}')
-        raise e
+        # If the attachment was successful, send the email
+        else:
 
-    # If the attachment was successful, send the email
-    else:
-        smtp_server = smtp(email_config['smtp_server'], email_config['smtp_port'])
-        smtp_server.starttls()
+            smtp_server = smtp(self.email_config['smtp_server'], self.email_config['smtp_port'])
 
-        # Login Credentials for sending the mail
-        smtp_server.login(email_config['user'], email_config['password'])
-
-        # send the message via the server.
-        print(f'Sending email to: {email_address}')
-        smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
-
-        smtp_server.quit()
+            # Login Credentials for sending the mail
+            smtp_server.login(self.email_config['user'], self.email_config['password'])
+            print(f'Sending email to: {email_address}')
+            smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
+            smtp_server.quit()

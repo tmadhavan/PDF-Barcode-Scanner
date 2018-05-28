@@ -108,7 +108,6 @@ class Uploader {
     });
 
     req.open("POST", "http://vps547804.ovh.net/api/v1/upload");
-    req.timeout = 5000;
     req.setRequestHeader("Access-Control-Allow-Origin", "*");
     req.send(data);
   }
