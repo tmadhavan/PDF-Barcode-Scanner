@@ -1,6 +1,6 @@
 import os
 from urllib.parse import urlparse
-from scanning.pdf_scanner import scan_pdf
+from scanning.pdf import scan_pdf
 
 
 class Scanner:

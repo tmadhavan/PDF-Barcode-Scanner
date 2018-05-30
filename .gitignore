@@ -1,6 +1,5 @@
 local.properties
 barcodes.txt
-requirements.txt
 uploads/**
 
 # IDEA STUFF
