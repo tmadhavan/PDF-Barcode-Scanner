@@ -1,5 +1,5 @@
 import shutil
-from smtplib import SMTP_SSL as smtp, SMTPHeloError, SMTPNotSupportedError
+from smtplib import SMTP as smtp, SMTPHeloError, SMTPNotSupportedError
 from email.mime.multipart import MIMEMultipart, MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
@@ -37,8 +37,6 @@ class EmailThread(threading.Thread):
     def __init__(self, email_work_queue, email_config):
         self.email_queue = email_work_queue
         self.email_config = email_config
-        # self.smtp_server = smtp(email_config['smtp_server'], email_config['smtp_port'])
-        self.smtp_server = smtp(email_config['smtp_server'], 465)
         super().__init__()
 
     def run(self):
@@ -100,7 +98,7 @@ class EmailThread(threading.Thread):
         else:
 
             smtp_server = smtp(self.email_config['smtp_server'], self.email_config['smtp_port'])
-
+            smtp_server.starttls()
             # Login Credentials for sending the mail
             smtp_server.login(self.email_config['user'], self.email_config['password'])
             print(f'Sending email to: {email_address}')

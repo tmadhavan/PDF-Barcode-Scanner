@@ -9,6 +9,7 @@ from scanning.scanners import PdfScanner
 from server.app_manager import AppManager
 from validate_email import validate_email
 
+
 class UploadController(Resource):
 
     ALLOWED_FILETYPES = ['pdf']
@@ -29,6 +30,7 @@ class UploadController(Resource):
     # TODO At the moment we're just dealing with PDF scanning. Add a req parameter to differentiate between URL and
     # PDF scanning
     def post(self) -> tuple:
+
         # get() rather than ['key'] returns a default of None rather than raising KeyError
         uploaded_file = request.files.get(self.HTML_INPUT_NAME)
         email_address = request.form[self.EMAIL_FORM_INPUT_NAME]
